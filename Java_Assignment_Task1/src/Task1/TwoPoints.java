@@ -10,11 +10,11 @@ public class TwoPoints {
 
     public static int computePointOfInterception(int x, int y){
         while(x != y){
-            x+=2;
             x %= 12;    // wrap number around the clock faces limited 12 points
+            x+=2;
 
-            y++;
             y %= 12;
+            y++;
         }
         return x;   // point of interception
     }
