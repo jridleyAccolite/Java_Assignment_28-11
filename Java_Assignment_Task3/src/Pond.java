@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Pond implements Runnable {
+
     public ExecutorService meetings;
     private static final int poolSize = 5;
     public static ArrayList<Fish> fish;
@@ -25,32 +26,35 @@ public class Pond implements Runnable {
     private void startSimulation() {
         System.out.println("Simulation beginning... population is: " + Fish.population);
         meetings = Executors.newFixedThreadPool(poolSize);
+        Random r = new Random();
 
         // pick a random fish and check whether it is alive and not busy
         // if so, submit to threadpool
         // if population is 0, shutdown meetings
-        Random r = new Random();
-
         while(true){
+
+            if(Fish.population <= 0){
+                System.out.println("All fish are dead... ending simulation");
+                meetings.shutdownNow();
+                break;
+            }
+
             int fishIndex = r.nextInt(fish.size());
             Fish chosenFish = fish.get(fishIndex);
 
-            while(chosenFish.isDead() || chosenFish.isBusy()) {
+            while(chosenFish.isDead()) {
                 fishIndex = r.nextInt(fish.size());
                 chosenFish = fish.get(fishIndex);
 
                 try {
                     Thread.sleep(100);
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     //terminate
                     meetings.shutdown();
                     return;
                 }
             }
 
-            chosenFish.setBusy(true);
-
-            //System.out.println("Fish chosen, fish number: " + fishIndex);
             meetings.submit(chosenFish);
         }
     }

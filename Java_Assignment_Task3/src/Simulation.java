@@ -3,9 +3,5 @@ public class Simulation {
         Thread pond = new Thread(new Pond());
         pond.start();
 
-        while(Fish.population != 0){
-            // wait
-        }
-        pond.interrupt();
     }
 }
