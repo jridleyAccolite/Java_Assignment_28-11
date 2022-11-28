@@ -48,7 +48,7 @@ public class Pond implements Runnable {
                 }
             }
 
-            chosenFish.setMeeting(true);
+            chosenFish.setBusy(true);
 
             //System.out.println("Fish chosen, fish number: " + fishIndex);
             meetings.submit(chosenFish);

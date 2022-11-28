@@ -1,11 +1,13 @@
-import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Fish implements Runnable{
     public static final int offspring = 2;
     private Boolean isMeeting = false;
     private Boolean gender;
     private Boolean isDead = false;
+    public Lock lock = new ReentrantLock();
     //private Fish partner;
 
     public static int population;
@@ -16,7 +18,7 @@ public class Fish implements Runnable{
         population++;
     }
     public Fish(){
-        // assign random gender
+        // creates a Fish with a random gender
         Random r = new Random();
         this.gender = r.nextBoolean();
         population++;
@@ -26,7 +28,7 @@ public class Fish implements Runnable{
         return isMeeting;
     }
 
-    public void setMeeting(Boolean meeting) {
+    public void setBusy(Boolean meeting) {
         isMeeting = meeting;
     }
 
@@ -75,20 +77,15 @@ public class Fish implements Runnable{
         // pick a fish to meet with
         Fish partner = pickPartner();
 
-        if(partner){
+        if(partner != null){
             // meet with that fish
             Meeting.meet(this, partner);
         }
+        this.setBusy(false);
+
+        partner.setBusy(false);
     }
 
-    public void prepareForMeeting(){
-        partner.setMeeting(true);
-    }
-
-    public void endMeeting(){
-        this.setMeeting(false);
-        partner.setMeeting(false);
-    }
 
     public Fish pickPartner(){
         //System.out.println("Picking partner...");
@@ -97,6 +94,7 @@ public class Fish implements Runnable{
         int partnerIndex = r.nextInt(Pond.fish.size());
         Fish partner = Pond.fish.get(partnerIndex);
 
+        // N.B. this fish has already been set to busy so it cannot select itself as a partner
         while(partner.isDead() || partner.isBusy()){
             // if partner is dead or busy, find new partner
             partnerIndex = r.nextInt(Pond.fish.size());
@@ -109,6 +107,11 @@ public class Fish implements Runnable{
                 return null;
             }
         }
+
+        partner.lock.lock();
+        partner.setBusy(true);
+        partner.lock.unlock();
+
         return partner;
     }
 
@@ -120,7 +123,7 @@ public class Fish implements Runnable{
         return this.isDead;
     }
 
-    public void die() {
+    public synchronized void die() {
         this.isDead = true;
         population--;
     }
